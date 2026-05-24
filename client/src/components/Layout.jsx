@@ -3,6 +3,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 import { Icon } from './Icon.jsx';
 import GlobalSearch from './GlobalSearch.jsx';
+import NotificationBell from './NotificationBell.jsx';
 
 export default function Layout() {
   const { user, isAdmin, logout } = useAuth();
@@ -32,6 +33,8 @@ export default function Layout() {
         <div className="nav-section">
           {link('/', 'grid', 'Overview', true)}
           {link('/projects', 'folder', 'Projects')}
+          {link('/contacts', 'contacts', 'Contacts')}
+          {link('/calendar', 'calendar', 'Calendar')}
         </div>
         {isAdmin && (
           <div className="nav-section">
@@ -73,6 +76,7 @@ export default function Layout() {
           <button className="hamburger" onClick={() => setOpen((o) => !o)} aria-label="Menu"><Icon name="menu" size={22} /></button>
           <GlobalSearch />
           <div className="grow" />
+          <NotificationBell />
           <button className="btn btn-icon btn-ghost" title={theme === 'dark' ? 'Light mode' : 'Dark mode'} onClick={() => setTheme((t) => t === 'dark' ? 'light' : 'dark')}>
             <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={19} />
           </button>

@@ -65,8 +65,15 @@ Demo baseline (don't break): spend **3,899,252**, gross profit **6,100,748**,
 TK/M settlement **±254,600**, 69 expenses.
 
 ## Features
-Global **Overview** (portfolio KPIs, project list, recent activity) and **global
-search** (topbar). Per project: stakeholders (split must total 100%); expenses
+Global pages: **Overview** (portfolio KPIs, project list, recent activity),
+**Contacts** (CRM directory: client/supplier/contractor/labor), **Calendar**
+(month view of task deadlines, payments, expenses across projects), **Notifications**
+(topbar bell — derived alerts: overdue/upcoming tasks, over-budget, split
+mismatches, outstanding receivables; `/api/notifications`), and a real **global
+search** (⌘K, comprehensive across all entities incl. amounts/payment-methods/
+file-names/contacts, full results page at `/search`, click-through opens the exact
+item via `?open=<id>`). **Undo** on deletes (toast `toast.action(msg, 'Undo', fn)`
+re-creates the item). Per project: stakeholders (split must total 100%); expenses
 (CRUD, split editor, vendor, receipt, filters); income/payments ledger;
 per-category budgets; **Tasks** (kanban todo/in_progress/done, priority, due date,
 assignee); **Files** (receipt/invoice uploads stored on the volume under

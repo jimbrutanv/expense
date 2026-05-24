@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../api.js';
 import { useProject } from './ProjectLayout.jsx';
 import { Modal, Field, Loading, Empty, Badge, ConfirmModal, useToast } from '../components/ui.jsx';
@@ -25,6 +25,15 @@ export default function Expenses() {
   }, [projectId, filters]);
 
   useEffect(() => { const t = setTimeout(load, 200); return () => clearTimeout(t); }, [load]);
+
+  // Deep-link: ?open=<id> (e.g. from global search) opens that expense.
+  const [sp, setSp] = useSearchParams();
+  useEffect(() => {
+    const openId = sp.get('open');
+    if (!openId) return;
+    api.get(`/projects/${projectId}/expenses/${openId}`).then(({ expense }) => setEditing(expense)).catch(() => {});
+    sp.delete('open'); setSp(sp, { replace: true });
+  }, [sp, projectId, setSp]);
 
   const shName = (id) => stakeholders.find((s) => s.id === id)?.name || '—';
   const set = (k) => (e) => setFilters({ ...filters, [k]: e.target.value });
@@ -142,7 +151,23 @@ export default function Expenses() {
         <ConfirmModal title="Delete expense" danger confirmLabel="Delete"
           message={`Delete ${deleting.ref}${deleting.description ? ` — ${deleting.description}` : ''}? This cannot be undone.`}
           onClose={() => setDeleting(null)}
-          onConfirm={async () => { try { await api.del(`/projects/${projectId}/expenses/${deleting.id}`); toast.success('Expense deleted'); setDeleting(null); load(); } catch (e) { toast.error(e.message); } }}
+          onConfirm={async () => {
+            const d = deleting;
+            try {
+              await api.del(`/projects/${projectId}/expenses/${d.id}`);
+              setDeleting(null); load();
+              toast.action('Expense deleted', 'Undo', async () => {
+                try {
+                  await api.post(`/projects/${projectId}/expenses`, {
+                    expense_date: d.expense_date, ref: d.ref, description: d.description, category: d.category,
+                    total: d.total, vendor: d.vendor, receipt_no: d.receipt_no, payment_method: d.payment_method, notes: d.notes,
+                    splits: (d.splits || []).map((s) => ({ stakeholder_id: s.stakeholder_id, amount: s.amount })),
+                  });
+                  toast.success('Expense restored'); load();
+                } catch (e) { toast.error(`Undo failed: ${e.message}`); }
+              });
+            } catch (e) { toast.error(e.message); }
+          }}
         />
       )}
     </div>

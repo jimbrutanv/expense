@@ -83,7 +83,17 @@ export default function Tasks() {
       {editing && <TaskModal projectId={projectId} task={editing} onClose={() => setEditing(null)} onSaved={() => { setEditing(null); load(); }} />}
       {deleting && <ConfirmModal title="Delete task" danger confirmLabel="Delete" message={`Delete "${deleting.title}"?`}
         onClose={() => setDeleting(null)}
-        onConfirm={async () => { try { await api.del(`/projects/${projectId}/tasks/${deleting.id}`); toast.success('Task deleted'); setDeleting(null); load(); } catch (e) { toast.error(e.message); } }} />}
+        onConfirm={async () => {
+          const d = deleting;
+          try {
+            await api.del(`/projects/${projectId}/tasks/${d.id}`);
+            setDeleting(null); load();
+            toast.action('Task deleted', 'Undo', async () => {
+              try { await api.post(`/projects/${projectId}/tasks`, { title: d.title, status: d.status, priority: d.priority, due_date: d.due_date, assignee: d.assignee, notes: d.notes }); toast.success('Task restored'); load(); }
+              catch (e) { toast.error(`Undo failed: ${e.message}`); }
+            });
+          } catch (e) { toast.error(e.message); }
+        }} />}
     </div>
   );
 }

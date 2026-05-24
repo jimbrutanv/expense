@@ -15,6 +15,9 @@ import Stakeholders from './pages/Stakeholders.jsx';
 import Settlement from './pages/Settlement.jsx';
 import Reports from './pages/Reports.jsx';
 import Overview from './pages/Overview.jsx';
+import Contacts from './pages/Contacts.jsx';
+import CalendarPage from './pages/Calendar.jsx';
+import SearchResults from './pages/SearchResults.jsx';
 import Members from './pages/Members.jsx';
 import ProjectSettings from './pages/ProjectSettings.jsx';
 import Users from './pages/Users.jsx';
@@ -44,6 +47,9 @@ export default function App() {
       <Route element={<Layout />}>
         <Route index element={<Overview />} />
         <Route path="projects" element={<Projects />} />
+        <Route path="contacts" element={<Contacts />} />
+        <Route path="calendar" element={<CalendarPage />} />
+        <Route path="search" element={<SearchResults />} />
         <Route path="projects/:projectId" element={<ProjectLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />

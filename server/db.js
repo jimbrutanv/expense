@@ -187,6 +187,20 @@ CREATE TABLE IF NOT EXISTS backups (
   created_at TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
+CREATE TABLE IF NOT EXISTS contacts (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  name       TEXT NOT NULL,
+  type       TEXT NOT NULL DEFAULT 'other' CHECK (type IN ('client','supplier','contractor','labor','consultant','other')),
+  company    TEXT DEFAULT '',
+  phone      TEXT DEFAULT '',
+  email      TEXT DEFAULT '',
+  address    TEXT DEFAULT '',
+  notes      TEXT DEFAULT '',
+  created_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS settings (
   key   TEXT PRIMARY KEY,
   value TEXT

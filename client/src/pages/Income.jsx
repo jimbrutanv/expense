@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../api.js';
 import { useProject } from './ProjectLayout.jsx';
 import { Modal, Field, Loading, Empty, Badge, ConfirmModal, useToast } from '../components/ui.jsx';
@@ -23,6 +23,14 @@ export default function Income() {
     setData(await api.get(`/projects/${projectId}/income?${qs}`));
   }, [projectId, filters]);
   useEffect(() => { const t = setTimeout(load, 200); return () => clearTimeout(t); }, [load]);
+  const [sp, setSp] = useSearchParams();
+  useEffect(() => {
+    const openId = sp.get('open');
+    if (!openId || !data) return;
+    const found = data.incomes.find((i) => String(i.id) === openId);
+    if (found) setEditing(found);
+    sp.delete('open'); setSp(sp, { replace: true });
+  }, [sp, data, setSp]);
   const set = (k) => (e) => setFilters({ ...filters, [k]: e.target.value });
   const exportQs = new URLSearchParams(Object.entries(filters).filter(([k, v]) => v && k !== 'sort')).toString();
 
@@ -92,7 +100,17 @@ export default function Income() {
       {deleting && <ConfirmModal title="Delete payment" danger confirmLabel="Delete"
         message={`Delete ${deleting.ref}${deleting.source ? ` from ${deleting.source}` : ''}?`}
         onClose={() => setDeleting(null)}
-        onConfirm={async () => { try { await api.del(`/projects/${projectId}/income/${deleting.id}`); toast.success('Payment deleted'); setDeleting(null); load(); } catch (e) { toast.error(e.message); } }} />}
+        onConfirm={async () => {
+          const d = deleting;
+          try {
+            await api.del(`/projects/${projectId}/income/${d.id}`);
+            setDeleting(null); load();
+            toast.action('Payment deleted', 'Undo', async () => {
+              try { await api.post(`/projects/${projectId}/income`, { income_date: d.income_date, ref: d.ref, source: d.source, category: d.category, amount: d.amount, method: d.method, notes: d.notes }); toast.success('Payment restored'); load(); }
+              catch (e) { toast.error(`Undo failed: ${e.message}`); }
+            });
+          } catch (e) { toast.error(e.message); }
+        }} />}
     </div>
   );
 }

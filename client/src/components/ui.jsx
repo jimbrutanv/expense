@@ -8,24 +8,30 @@ export const useToast = () => useContext(ToastCtx);
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
   const remove = useCallback((id) => setToasts((t) => t.filter((x) => x.id !== id)), []);
-  const push = useCallback((message, type = 'default') => {
+  const push = useCallback((message, type = 'default', opts = {}) => {
     const id = Math.random().toString(36).slice(2);
-    setToasts((t) => [...t, { id, message, type }]);
-    setTimeout(() => remove(id), 4200);
+    setToasts((t) => [...t, { id, message, type, action: opts.action, actionLabel: opts.actionLabel }]);
+    setTimeout(() => remove(id), opts.action ? 7000 : 4200);
+    return id;
   }, [remove]);
   const toast = {
     show: push,
-    success: (m) => push(m, 'success'),
+    success: (m, opts) => push(m, 'success', opts),
     error: (m) => push(m, 'error'),
+    // an "Undo"-style toast with an action button
+    action: (m, label, fn) => push(m, 'default', { action: fn, actionLabel: label }),
   };
   return (
     <ToastCtx.Provider value={toast}>
       {children}
       <div className="toasts">
         {toasts.map((t) => (
-          <div key={t.id} className={`toast ${t.type}`} onClick={() => remove(t.id)}>
+          <div key={t.id} className={`toast ${t.type}`}>
             <Icon name={t.type === 'success' ? 'check-circle' : t.type === 'error' ? 'alert' : 'info'} size={17} />
-            <span>{t.message}</span>
+            <span style={{ flex: 1 }}>{t.message}</span>
+            {t.action
+              ? <button className="toast-action" onClick={() => { t.action(); remove(t.id); }}>{t.actionLabel || 'Undo'}</button>
+              : <button className="toast-x" onClick={() => remove(t.id)} aria-label="Dismiss"><Icon name="x" size={14} /></button>}
           </div>
         ))}
       </div>
