@@ -24,13 +24,14 @@ export default function Income() {
   }, [projectId, filters]);
   useEffect(() => { const t = setTimeout(load, 200); return () => clearTimeout(t); }, [load]);
   const set = (k) => (e) => setFilters({ ...filters, [k]: e.target.value });
+  const exportQs = new URLSearchParams(Object.entries(filters).filter(([k, v]) => v && k !== 'sort')).toString();
 
   return (
     <div className="stack">
       <div className="flex between wrap">
         <h2 className="sec-head"><Icon name="trending" size={18} /> Income / Payments Received {data && <span className="muted" style={{ fontWeight: 400, fontSize: 14 }}>· {data.count} · {money(data.sum, cur)}</span>}</h2>
         <div className="flex wrap">
-          <button className="btn btn-sm" onClick={() => api.download(`/projects/${projectId}/export/income.csv`)}><Icon name="download" size={15} />CSV</button>
+          <button className="btn btn-sm" title={exportQs ? 'Exports the filtered rows' : 'Exports all income'} onClick={() => api.download(`/projects/${projectId}/export/income.csv?${exportQs}`)}><Icon name="download" size={15} />CSV{exportQs ? ' (filtered)' : ''}</button>
           {canEdit && <button className="btn btn-primary btn-sm" onClick={() => setEditing({})}><Icon name="plus" size={15} />Record Payment</button>}
         </div>
       </div>

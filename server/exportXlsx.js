@@ -131,25 +131,26 @@ export function buildProjectWorkbook(projectId) {
   return xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
 }
 
-/** Expenses-only workbook (single sheet, same column layout as the source). */
-export function buildExpensesWorkbook(projectId) {
+/** Expenses-only workbook (single sheet, same column layout as the source).
+ *  Pass `rows` to export a filtered subset; otherwise all expenses are used. */
+export function buildExpensesWorkbook(projectId, rows = null) {
   const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(projectId);
   if (!project) return null;
   const stakeholders = db.prepare('SELECT * FROM stakeholders WHERE project_id = ? ORDER BY position, id').all(projectId);
-  const expenses = db.prepare('SELECT * FROM expenses WHERE project_id = ? ORDER BY expense_date, id').all(projectId);
+  const expenses = rows || db.prepare('SELECT * FROM expenses WHERE project_id = ? ORDER BY expense_date, id').all(projectId);
   const splits = db.prepare('SELECT es.* FROM expense_splits es JOIN expenses e ON e.id = es.expense_id WHERE e.project_id = ?').all(projectId);
   const byExp = new Map();
   for (const s of splits) { if (!byExp.has(s.expense_id)) byExp.set(s.expense_id, {}); byExp.get(s.expense_id)[s.stakeholder_id] = s.amount; }
 
-  const rows = [['Date', 'Expense ID', 'Description', 'Category', 'Total Expense', ...stakeholders.map((s) => s.name), 'Split Check', 'Receipt #', 'Payment Method', 'Notes']];
+  const aoa = [['Date', 'Expense ID', 'Description', 'Category', 'Total Expense', ...stakeholders.map((s) => s.name), 'Split Check', 'Receipt #', 'Payment Method', 'Notes']];
   for (const e of expenses) {
     const m = byExp.get(e.id) || {};
     const allocated = stakeholders.reduce((a, s) => a + (m[s.id] || 0), 0);
     const diff = Math.round(((e.total || 0) - allocated) * 100) / 100;
-    rows.push([e.expense_date, e.ref, e.description || '', e.category || '', e.total || 0, ...stakeholders.map((s) => (m[s.id] != null ? m[s.id] : '')), Math.abs(diff) < 0.01 ? 'OK' : diff > 0 ? `Under ${diff}` : `Over ${-diff}`, e.receipt_no || '', e.payment_method || '', e.notes || '']);
+    aoa.push([e.expense_date, e.ref, e.description || '', e.category || '', e.total || 0, ...stakeholders.map((s) => (m[s.id] != null ? m[s.id] : '')), Math.abs(diff) < 0.01 ? 'OK' : diff > 0 ? `Under ${diff}` : `Over ${-diff}`, e.receipt_no || '', e.payment_method || '', e.notes || '']);
   }
   const wb = xlsx.utils.book_new();
-  const ws = xlsx.utils.aoa_to_sheet(rows);
+  const ws = xlsx.utils.aoa_to_sheet(aoa);
   xlsx.utils.book_append_sheet(wb, ws, 'Expenses');
   return xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
 }

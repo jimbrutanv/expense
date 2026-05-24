@@ -28,14 +28,16 @@ export default function Expenses() {
 
   const shName = (id) => stakeholders.find((s) => s.id === id)?.name || '—';
   const set = (k) => (e) => setFilters({ ...filters, [k]: e.target.value });
+  const exportQs = new URLSearchParams(Object.entries(filters).filter(([k, v]) => v && k !== 'sort')).toString();
+  const hasFilters = !!exportQs;
 
   return (
     <div className="stack">
       <div className="flex between wrap">
         <h2 style={{ fontSize: 17 }}>Expenses {data && <span className="muted" style={{ fontWeight: 500, fontSize: 14 }}>· {data.count} entries · {money(data.sum, cur)}</span>}</h2>
         <div className="flex wrap">
-          <button className="btn btn-sm" onClick={() => api.download(`/projects/${projectId}/export/expenses.xlsx`)}><Icon name="table" size={15} />Excel</button>
-          <button className="btn btn-sm" onClick={() => api.download(`/projects/${projectId}/export/expenses.csv`)}><Icon name="download" size={15} />CSV</button>
+          <button className="btn btn-sm" title={hasFilters ? 'Exports the filtered rows' : 'Exports all expenses'} onClick={() => api.download(`/projects/${projectId}/export/expenses.xlsx?${exportQs}`)}><Icon name="table" size={15} />Excel{hasFilters ? ' (filtered)' : ''}</button>
+          <button className="btn btn-sm" onClick={() => api.download(`/projects/${projectId}/export/expenses.csv?${exportQs}`)}><Icon name="download" size={15} />CSV</button>
           {canEdit && <button className="btn btn-primary btn-sm" onClick={() => setEditing({})}><Icon name="plus" size={15} />Add Expense</button>}
         </div>
       </div>

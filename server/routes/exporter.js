@@ -16,10 +16,35 @@ function send(res, filename, csv) {
 
 const pct = (f) => `${(f * 100).toFixed(2)}%`;
 
+// Build a filtered expense list from the same query params the Expenses page uses.
+function filteredExpenses(projectId, q) {
+  const where = ['e.project_id = @pid'];
+  const params = { pid: projectId };
+  if (q.search) { where.push('(e.description LIKE @q OR e.ref LIKE @q OR e.notes LIKE @q OR e.receipt_no LIKE @q OR e.vendor LIKE @q)'); params.q = `%${q.search}%`; }
+  if (q.category) { where.push('e.category = @category'); params.category = q.category; }
+  if (q.payment_method) { where.push('e.payment_method = @pm'); params.pm = q.payment_method; }
+  if (q.vendor) { where.push('e.vendor = @vendor'); params.vendor = q.vendor; }
+  if (q.from) { where.push('e.expense_date >= @from'); params.from = q.from; }
+  if (q.to) { where.push('e.expense_date <= @to'); params.to = q.to; }
+  if (q.stakeholder_id) { where.push('e.id IN (SELECT expense_id FROM expense_splits WHERE stakeholder_id = @sid)'); params.sid = parseInt(q.stakeholder_id, 10); }
+  return db.prepare(`SELECT e.* FROM expenses e WHERE ${where.join(' AND ')} ORDER BY e.expense_date, e.id`).all(params);
+}
+
+function filteredIncomes(projectId, q) {
+  const where = ['project_id = @pid'];
+  const params = { pid: projectId };
+  if (q.search) { where.push('(source LIKE @q OR ref LIKE @q OR notes LIKE @q OR category LIKE @q)'); params.q = `%${q.search}%`; }
+  if (q.category) { where.push('category = @category'); params.category = q.category; }
+  if (q.from) { where.push('income_date >= @from'); params.from = q.from; }
+  if (q.to) { where.push('income_date <= @to'); params.to = q.to; }
+  return db.prepare(`SELECT * FROM incomes WHERE ${where.join(' AND ')} ORDER BY income_date, id`).all(params);
+}
+
 // ── Expenses (with one column per stakeholder, mirroring the spreadsheet) ──
+// Honours the same filters as the Expenses page (search/category/vendor/date/…).
 router.get('/expenses.csv', requireProjectAccess('viewer', 'expenses'), (req, res) => {
   const stakeholders = db.prepare('SELECT * FROM stakeholders WHERE project_id = ? ORDER BY position, id').all(req.project.id);
-  const expenses = db.prepare('SELECT * FROM expenses WHERE project_id = ? ORDER BY expense_date, id').all(req.project.id);
+  const expenses = filteredExpenses(req.project.id, req.query);
   const splits = db
     .prepare('SELECT es.* FROM expense_splits es JOIN expenses e ON e.id = es.expense_id WHERE e.project_id = ?')
     .all(req.project.id);
@@ -45,7 +70,7 @@ router.get('/expenses.csv', requireProjectAccess('viewer', 'expenses'), (req, re
 
 // ── Income / payments received ────────────────────────────────────────
 router.get('/income.csv', requireProjectAccess('viewer', 'income'), (req, res) => {
-  const rows = db.prepare('SELECT * FROM incomes WHERE project_id = ? ORDER BY income_date, id').all(req.project.id);
+  const rows = filteredIncomes(req.project.id, req.query);
   const headers = ['Date', 'Ref', 'Source / Payer', 'Category', 'Amount', 'Method', 'Notes'];
   const data = rows.map((i) => [i.income_date, i.ref, i.source, i.category, i.amount, i.method, i.notes]);
   send(res, `${slug(req.project.name)}_income.csv`, toCsv(headers, data));
@@ -113,7 +138,7 @@ router.get('/project.xlsx', requireProjectAccess('viewer'), (req, res) => {
 });
 
 router.get('/expenses.xlsx', requireProjectAccess('viewer', 'expenses'), (req, res) => {
-  const buf = buildExpensesWorkbook(req.project.id);
+  const buf = buildExpensesWorkbook(req.project.id, filteredExpenses(req.project.id, req.query));
   logAudit({ userId: req.user.id, userEmail: req.user.email, action: 'export_xlsx', entity: 'expenses', projectId: req.project.id, ip: req.ip });
   sendXlsx(res, `${slug(req.project.name)}_expenses.xlsx`, buf);
 });

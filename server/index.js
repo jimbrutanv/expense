@@ -50,8 +50,22 @@ app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
 
 // ── Serve the built client (production) ─────────────────────────────────
 if (fs.existsSync(CLIENT_DIST)) {
-  app.use(express.static(CLIENT_DIST));
-  app.get('*', (req, res) => res.sendFile(`${CLIENT_DIST}/index.html`));
+  // Hashed assets are immutable and cached forever; the HTML shell must always
+  // revalidate so a new deploy is picked up immediately (no stale "old" app).
+  app.use(express.static(CLIENT_DIST, {
+    etag: true,
+    setHeaders: (res, filePath) => {
+      if (/[\\/]assets[\\/]/.test(filePath)) {
+        res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+      } else {
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+      }
+    },
+  }));
+  app.get('*', (req, res) => {
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.sendFile(`${CLIENT_DIST}/index.html`);
+  });
 } else {
   app.get('/', (req, res) =>
     res.send('<h1>ptracker API</h1><p>Client not built yet. Run <code>npm run build</code>, or use the Vite dev server on :5173.</p>')
