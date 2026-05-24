@@ -6,3 +6,5 @@ data/
 .env
 .DS_Store
 *.xlsx:Zone.Identifier
+deploy_railway.mjs
+.railway/
