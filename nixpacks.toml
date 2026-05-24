@@ -1,0 +1,13 @@
+# Railway / Nixpacks build configuration.
+# Installs backend + frontend deps, builds the client, then runs the server.
+[phases.setup]
+nixPkgs = ["nodejs_20", "python3", "gcc", "gnumake"]
+
+[phases.install]
+cmds = ["npm install", "npm --prefix client install"]
+
+[phases.build]
+cmds = ["npm --prefix client run build"]
+
+[start]
+cmd = "node server/index.js"
