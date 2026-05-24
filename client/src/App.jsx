@@ -9,9 +9,12 @@ import ProjectLayout from './pages/ProjectLayout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Expenses from './pages/Expenses.jsx';
 import Income from './pages/Income.jsx';
+import Tasks from './pages/Tasks.jsx';
+import Files from './pages/Files.jsx';
 import Stakeholders from './pages/Stakeholders.jsx';
 import Settlement from './pages/Settlement.jsx';
 import Reports from './pages/Reports.jsx';
+import Overview from './pages/Overview.jsx';
 import Members from './pages/Members.jsx';
 import ProjectSettings from './pages/ProjectSettings.jsx';
 import Users from './pages/Users.jsx';
@@ -39,12 +42,15 @@ export default function App() {
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Projects />} />
+        <Route index element={<Overview />} />
+        <Route path="projects" element={<Projects />} />
         <Route path="projects/:projectId" element={<ProjectLayout />}>
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="expenses" element={<Expenses />} />
           <Route path="income" element={<Income />} />
+          <Route path="tasks" element={<Tasks />} />
+          <Route path="files" element={<Files />} />
           <Route path="stakeholders" element={<Stakeholders />} />
           <Route path="settlement" element={<Settlement />} />
           <Route path="reports" element={<Reports />} />

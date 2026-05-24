@@ -8,8 +8,10 @@ const TABS = [
   { to: 'dashboard', label: 'Dashboard', view: 'dashboard' },
   { to: 'expenses', label: 'Expenses', view: 'expenses' },
   { to: 'income', label: 'Income', view: 'income' },
+  { to: 'tasks', label: 'Tasks', view: 'tasks' },
   { to: 'stakeholders', label: 'Stakeholders', view: 'stakeholders' },
   { to: 'settlement', label: 'Settlement', view: 'settlement' },
+  { to: 'files', label: 'Files', view: 'files' },
   { to: 'reports', label: 'Reports', view: 'reports' },
   { to: 'members', label: 'Members', view: 'members', manager: true },
   { to: 'settings', label: 'Settings', view: 'settings', manager: true },
@@ -54,7 +56,7 @@ export default function ProjectLayout() {
     <>
       <div className="page-head">
         <div>
-          <span className="crumb" style={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
+          <span className="crumb" style={{ cursor: 'pointer' }} onClick={() => navigate('/projects')}>
             <Icon name="folder" size={14} /> Projects
           </span>
           <h1 style={{ marginTop: 4 }}>{data.project.name}</h1>

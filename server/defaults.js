@@ -10,7 +10,7 @@ export const DEFAULT_PAYMENT_METHODS = [
   'Bank Transfer', 'Cash', 'Cheque', 'Card', 'UPI', 'Other',
 ];
 
-export const ALL_VIEWS = ['dashboard', 'expenses', 'income', 'stakeholders', 'settlement', 'reports', 'members', 'settings'];
+export const ALL_VIEWS = ['dashboard', 'expenses', 'income', 'tasks', 'stakeholders', 'settlement', 'files', 'reports', 'members', 'settings'];
 
 export function seedProjectLists(projectId) {
   const insCat = db.prepare('INSERT OR IGNORE INTO categories (project_id, name, position) VALUES (?, ?, ?)');

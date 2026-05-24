@@ -9,6 +9,7 @@ export const ROOT = path.resolve(__dirname, '..');
 // DATA_DIR can be overridden (e.g. point it at a Railway persistent volume mount).
 export const DATA_DIR = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(ROOT, 'data');
 export const BACKUP_DIR = path.join(DATA_DIR, 'backups');
+export const ATTACH_DIR = path.join(DATA_DIR, 'attachments');
 export const DB_PATH = path.join(DATA_DIR, 'app.db');
 export const CLIENT_DIST = path.join(ROOT, 'client', 'dist');
 

@@ -8,8 +8,10 @@ const VIEW_OPTIONS = [
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'expenses', label: 'Expenses' },
   { key: 'income', label: 'Income' },
+  { key: 'tasks', label: 'Tasks' },
   { key: 'stakeholders', label: 'Stakeholders' },
   { key: 'settlement', label: 'Settlement' },
+  { key: 'files', label: 'Files' },
   { key: 'reports', label: 'Reports' },
 ];
 const LEVELS = [
@@ -86,7 +88,7 @@ function MemberModal({ projectId, member, candidates, onClose, onSaved }) {
   const isNew = member.isNew;
   const [userId, setUserId] = useState(member.user_id || (candidates[0] && candidates[0].id) || '');
   const [level, setLevel] = useState(member.access_level || 'viewer');
-  const [views, setViews] = useState(member.views || ['dashboard', 'expenses', 'income', 'stakeholders', 'settlement', 'reports']);
+  const [views, setViews] = useState(member.views || ['dashboard', 'expenses', 'income', 'tasks', 'stakeholders', 'settlement', 'files', 'reports']);
   const [busy, setBusy] = useState(false);
 
   const toggle = (v) => setViews((cur) => cur.includes(v) ? cur.filter((x) => x !== v) : [...cur, v]);

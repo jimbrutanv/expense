@@ -1,9 +1,10 @@
 import Database from 'better-sqlite3';
 import fs from 'node:fs';
-import { DATA_DIR, BACKUP_DIR, DB_PATH } from './config.js';
+import { DATA_DIR, BACKUP_DIR, ATTACH_DIR, DB_PATH } from './config.js';
 
 fs.mkdirSync(DATA_DIR, { recursive: true });
 fs.mkdirSync(BACKUP_DIR, { recursive: true });
+fs.mkdirSync(ATTACH_DIR, { recursive: true });
 
 export const db = new Database(DB_PATH);
 db.pragma('journal_mode = WAL');
@@ -135,6 +136,34 @@ CREATE TABLE IF NOT EXISTS vendors (
   UNIQUE (project_id, name)
 );
 
+CREATE TABLE IF NOT EXISTS tasks (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id  INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  title       TEXT NOT NULL,
+  status      TEXT NOT NULL DEFAULT 'todo' CHECK (status IN ('todo','in_progress','done')),
+  priority    TEXT NOT NULL DEFAULT 'medium' CHECK (priority IN ('low','medium','high')),
+  due_date    TEXT DEFAULT '',
+  assignee    TEXT DEFAULT '',
+  notes       TEXT DEFAULT '',
+  position    INTEGER NOT NULL DEFAULT 0,
+  created_by  INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE TABLE IF NOT EXISTS attachments (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id    INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  expense_id    INTEGER REFERENCES expenses(id) ON DELETE SET NULL,
+  stored_name   TEXT NOT NULL,
+  original_name TEXT NOT NULL,
+  mime          TEXT DEFAULT '',
+  size          INTEGER NOT NULL DEFAULT 0,
+  label         TEXT DEFAULT '',
+  uploaded_by   INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 CREATE TABLE IF NOT EXISTS audit_log (
   id         INTEGER PRIMARY KEY AUTOINCREMENT,
   user_id    INTEGER REFERENCES users(id) ON DELETE SET NULL,
@@ -166,6 +195,8 @@ CREATE TABLE IF NOT EXISTS settings (
 CREATE INDEX IF NOT EXISTS idx_expenses_project    ON expenses(project_id);
 CREATE INDEX IF NOT EXISTS idx_incomes_project     ON incomes(project_id);
 CREATE INDEX IF NOT EXISTS idx_budgets_project     ON budgets(project_id);
+CREATE INDEX IF NOT EXISTS idx_tasks_project       ON tasks(project_id);
+CREATE INDEX IF NOT EXISTS idx_attachments_project ON attachments(project_id);
 CREATE INDEX IF NOT EXISTS idx_splits_expense      ON expense_splits(expense_id);
 CREATE INDEX IF NOT EXISTS idx_splits_stakeholder  ON expense_splits(stakeholder_id);
 CREATE INDEX IF NOT EXISTS idx_stakeholders_project ON stakeholders(project_id);

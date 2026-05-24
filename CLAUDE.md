@@ -41,8 +41,11 @@ the demo workbook. Tests: `npm run test:smoke` (needs the server running);
 Roles: `superadmin` > `admin` > `user`. Admins implicitly manage all projects.
 Regular users get a per-project **access level** (`viewer` < `collaborator` <
 `manager`) plus a list of enabled **views**
-(`dashboard, expenses, income, stakeholders, settlement, reports`; managers also
-get `members, settings`). Enforced by `requireProjectAccess(minLevel, view)`.
+(`dashboard, expenses, income, tasks, stakeholders, settlement, files, reports`;
+managers also get `members, settings`). Enforced by
+`requireProjectAccess(minLevel, view)`. Global pages: **Overview** (`/api/overview`,
+portfolio) and **Search** (`/api/search?q=`, across projects/expenses/income/
+stakeholders/vendors/tasks, scoped to accessible projects).
 
 ## Financial model (in `server/finance.js`, verified against the demo)
 ```
@@ -62,16 +65,19 @@ Demo baseline (don't break): spend **3,899,252**, gross profit **6,100,748**,
 TK/M settlement **±254,600**, 69 expenses.
 
 ## Features
-Projects (multi); stakeholders (split must total 100%); expenses (CRUD, split
-editor, vendor, receipt, filters); income/payments ledger; per-category budgets;
-dashboard (KPIs, cash position, budget bars, charts); settlement; **Reports** tab
-(P&L, cash position, cash-flow chart, budgets, category, stakeholder statement,
-print/PDF); vendors directory; CSV/JSON/**XLSX** export (xlsx mirrors the original
-3-sheet layout + an Income sheet, and is re-importable); **filtered exports**
-(export honours the active list filters); xlsx import; auto+manual backups,
-restore; audit log; in-app Documentation (admin). UI: responsive (tables become
-labeled cards on phones via `table.cards` + `data-label` tds), collapsible
-sidebar, dark mode, PWA manifest.
+Global **Overview** (portfolio KPIs, project list, recent activity) and **global
+search** (topbar). Per project: stakeholders (split must total 100%); expenses
+(CRUD, split editor, vendor, receipt, filters); income/payments ledger;
+per-category budgets; **Tasks** (kanban todo/in_progress/done, priority, due date,
+assignee); **Files** (receipt/invoice uploads stored on the volume under
+`ATTACH_DIR`, download/delete, optional expense link); dashboard (KPIs, cash
+position, budget bars, charts); settlement; **Reports** (P&L, cash position,
+cash-flow chart, budgets, category, stakeholder statement, print/PDF); vendors.
+Export CSV/JSON/**XLSX** (xlsx mirrors the original 3-sheet layout + Income sheet,
+re-importable); **filtered exports** honour active list filters; xlsx import;
+auto+manual backups, restore; audit log; in-app Documentation. UI: responsive
+(tables become labeled cards on phones via `table.cards` + `data-label` tds),
+collapsible sidebar, dark mode, PWA.
 
 ## Conventions
 - Match existing code style. Keep UI emoji-free (use `<Icon>`).

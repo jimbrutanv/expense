@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth.jsx';
 import { Icon } from './Icon.jsx';
+import GlobalSearch from './GlobalSearch.jsx';
 
 export default function Layout() {
   const { user, isAdmin, logout } = useAuth();
@@ -29,7 +30,8 @@ export default function Layout() {
         <div className="brand"><Icon name="building" size={22} /><span className="brand-text">BuildLedger</span></div>
 
         <div className="nav-section">
-          {link('/', 'folder', 'Projects', true)}
+          {link('/', 'grid', 'Overview', true)}
+          {link('/projects', 'folder', 'Projects')}
         </div>
         {isAdmin && (
           <div className="nav-section">
@@ -69,7 +71,7 @@ export default function Layout() {
       <div className="main">
         <header className="topbar">
           <button className="hamburger" onClick={() => setOpen((o) => !o)} aria-label="Menu"><Icon name="menu" size={22} /></button>
-          <span className="mobile-title"><Icon name="building" size={18} style={{ color: 'var(--brand)', verticalAlign: '-3px' }} /> BuildLedger</span>
+          <GlobalSearch />
           <div className="grow" />
           <button className="btn btn-icon btn-ghost" title={theme === 'dark' ? 'Light mode' : 'Dark mode'} onClick={() => setTheme((t) => t === 'dark' ? 'light' : 'dark')}>
             <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={19} />
