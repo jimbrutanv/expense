@@ -5,12 +5,13 @@ import { useAuth } from '../auth.jsx';
 import { useProject } from './ProjectLayout.jsx';
 import { Field, Badge, ConfirmModal, useToast } from '../components/ui.jsx';
 import { Icon } from '../components/Icon.jsx';
+import { money } from '../format.js';
 
 const CURRENCIES = ['INR', 'USD', 'PKR', 'EUR', 'GBP', 'AED'];
 
 export default function ProjectSettings() {
   const { projectId } = useParams();
-  const { project, categories, payment_methods, vendors = [], reload } = useProject();
+  const { project, categories, payment_methods, vendors = [], budgets = [], reload } = useProject();
   const { isAdmin } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
@@ -60,6 +61,8 @@ export default function ProjectSettings() {
 
       <VendorsEditor projectId={projectId} vendors={vendors} reload={reload} />
 
+      <BudgetsEditor projectId={projectId} categories={categories} budgets={budgets} reload={reload} cur={{ currency: project.currency, locale: project.locale }} />
+
       {isAdmin && (
         <div className="card" style={{ borderColor: '#fecaca' }}>
           <div className="card-head"><h3 style={{ color: 'var(--red)' }}>Danger Zone</h3></div>
@@ -74,6 +77,44 @@ export default function ProjectSettings() {
         message={`Delete "${project.name}" and ALL its data? This cannot be undone. Make sure you have a backup.`}
         onClose={() => setConfirmDel(false)}
         onConfirm={async () => { try { await api.del(`/projects/${projectId}`); toast.success('Project deleted'); navigate('/'); } catch (e) { toast.error(e.message); } }} />}
+    </div>
+  );
+}
+
+function BudgetsEditor({ projectId, categories, budgets, reload, cur }) {
+  const toast = useToast();
+  const [category, setCategory] = useState(categories[0]?.name || '');
+  const [amount, setAmount] = useState('');
+  const save = async () => {
+    if (!category) return toast.error('Pick a category');
+    try {
+      await api.put(`/projects/${projectId}/budgets`, { category, amount: Number(amount) || 0 });
+      setAmount(''); reload(); toast.success('Budget saved');
+    } catch (e) { toast.error(e.message); }
+  };
+  const del = async (id) => { try { await api.del(`/projects/${projectId}/budgets/${id}`); reload(); } catch (e) { toast.error(e.message); } };
+  return (
+    <div className="card">
+      <div className="card-head"><h3><Icon name="pie-chart" size={16} /> Category Budgets</h3></div>
+      <div className="card-pad">
+        <div className="row" style={{ marginBottom: 12 }}>
+          <select className="input" value={category} onChange={(e) => setCategory(e.target.value)}>
+            {categories.map((c) => <option key={c.id} value={c.name}>{c.name}</option>)}
+          </select>
+          <input className="input" type="number" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Budget amount" />
+          <button className="btn btn-primary" style={{ flex: '0 0 auto' }} onClick={save}><Icon name="plus" size={15} />Set</button>
+        </div>
+        {budgets.length === 0 ? <span className="muted">No budgets set. Set a spend budget per category to track budget vs actual on the dashboard and reports.</span> : (
+          <div className="flex wrap" style={{ gap: 8 }}>
+            {budgets.map((b) => (
+              <span key={b.id} className="badge gray" style={{ paddingRight: 5 }}>
+                {b.category}: {money(b.amount, cur)}
+                <button className="x-btn" style={{ padding: 1, marginLeft: 2 }} onClick={() => del(b.id)}><Icon name="x" size={13} /></button>
+              </span>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

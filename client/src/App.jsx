@@ -8,8 +8,10 @@ import Projects from './pages/Projects.jsx';
 import ProjectLayout from './pages/ProjectLayout.jsx';
 import Dashboard from './pages/Dashboard.jsx';
 import Expenses from './pages/Expenses.jsx';
+import Income from './pages/Income.jsx';
 import Stakeholders from './pages/Stakeholders.jsx';
 import Settlement from './pages/Settlement.jsx';
+import Reports from './pages/Reports.jsx';
 import Members from './pages/Members.jsx';
 import ProjectSettings from './pages/ProjectSettings.jsx';
 import Users from './pages/Users.jsx';
@@ -42,8 +44,10 @@ export default function App() {
           <Route index element={<Dashboard />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="expenses" element={<Expenses />} />
+          <Route path="income" element={<Income />} />
           <Route path="stakeholders" element={<Stakeholders />} />
           <Route path="settlement" element={<Settlement />} />
+          <Route path="reports" element={<Reports />} />
           <Route path="members" element={<Members />} />
           <Route path="settings" element={<ProjectSettings />} />
         </Route>

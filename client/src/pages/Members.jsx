@@ -7,8 +7,10 @@ import { Icon } from '../components/Icon.jsx';
 const VIEW_OPTIONS = [
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'expenses', label: 'Expenses' },
+  { key: 'income', label: 'Income' },
   { key: 'stakeholders', label: 'Stakeholders' },
   { key: 'settlement', label: 'Settlement' },
+  { key: 'reports', label: 'Reports' },
 ];
 const LEVELS = [
   { key: 'viewer', label: 'Viewer', desc: 'Read-only access to the enabled views' },
@@ -84,7 +86,7 @@ function MemberModal({ projectId, member, candidates, onClose, onSaved }) {
   const isNew = member.isNew;
   const [userId, setUserId] = useState(member.user_id || (candidates[0] && candidates[0].id) || '');
   const [level, setLevel] = useState(member.access_level || 'viewer');
-  const [views, setViews] = useState(member.views || ['dashboard', 'expenses', 'stakeholders', 'settlement']);
+  const [views, setViews] = useState(member.views || ['dashboard', 'expenses', 'income', 'stakeholders', 'settlement', 'reports']);
   const [busy, setBusy] = useState(false);
 
   const toggle = (v) => setViews((cur) => cur.includes(v) ? cur.filter((x) => x !== v) : [...cur, v]);

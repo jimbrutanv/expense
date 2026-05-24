@@ -44,10 +44,19 @@ export function computeProject(projectId) {
     paidByExpense.set(sp.expense_id, (paidByExpense.get(sp.expense_id) || 0) + sp.amount);
   }
 
+  const incomes = db
+    .prepare('SELECT * FROM incomes WHERE project_id = ? ORDER BY income_date, id')
+    .all(projectId);
+  const budgets = db.prepare('SELECT * FROM budgets WHERE project_id = ?').all(projectId);
+
   const totalCost = expenses.reduce((a, e) => a + (e.total || 0), 0);
+  const totalReceived = incomes.reduce((a, i) => a + (i.amount || 0), 0);
   const salePrice = project.sale_price || 0;
   const grossProfit = salePrice - totalCost;
   const netMargin = salePrice ? grossProfit / salePrice : 0;
+  const cashPosition = totalReceived - totalCost;          // actual cash in/out so far
+  const outstanding = salePrice - totalReceived;            // still to collect vs contract
+  const collectionPct = salePrice ? totalReceived / salePrice : 0;
   const totalSplitPct = stakeholders.reduce((a, s) => a + (s.split_pct || 0), 0);
 
   // split-check: how many expenses don't have their total fully allocated
@@ -99,16 +108,44 @@ export function computeProject(projectId) {
     .map((c) => ({ ...c, total: round2(c.total), share: totalCost ? c.total / totalCost : 0 }))
     .sort((a, b) => b.total - a.total);
 
-  // spend over time (monthly) for trend charts
+  // cash flow over time (monthly): expenses out vs income in
   const monthMap = new Map();
+  const monthIn = new Map();
   for (const e of expenses) {
-    const month = (e.expense_date || '').slice(0, 7) || 'unknown';
-    monthMap.set(month, round2((monthMap.get(month) || 0) + (e.total || 0)));
+    const month = (e.expense_date || '').slice(0, 7);
+    if (month) monthMap.set(month, round2((monthMap.get(month) || 0) + (e.total || 0)));
   }
-  const byMonth = [...monthMap.entries()]
-    .filter(([m]) => m !== 'unknown')
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([month, total]) => ({ month, total }));
+  for (const i of incomes) {
+    const month = (i.income_date || '').slice(0, 7);
+    if (month) monthIn.set(month, round2((monthIn.get(month) || 0) + (i.amount || 0)));
+  }
+  const months = [...new Set([...monthMap.keys(), ...monthIn.keys()])].sort((a, b) => a.localeCompare(b));
+  const byMonth = months.map((month) => ({ month, total: monthMap.get(month) || 0, income: monthIn.get(month) || 0 }));
+
+  // income grouped by source category
+  const incCatMap = new Map();
+  for (const i of incomes) {
+    const key = (i.category && i.category.trim()) || 'Uncategorised';
+    const cur = incCatMap.get(key) || { category: key, total: 0, count: 0 };
+    cur.total += i.amount || 0; cur.count += 1;
+    incCatMap.set(key, cur);
+  }
+  const incomeByCategory = [...incCatMap.values()].map((c) => ({ ...c, total: round2(c.total) })).sort((a, b) => b.total - a.total);
+
+  // budget vs actual per category (actual = spend in that category)
+  const spentByCat = new Map(byCategory.map((c) => [c.category, c.total]));
+  const budgetRows = budgets.map((b) => {
+    const actual = round2(spentByCat.get(b.category) || 0);
+    return {
+      category: b.category,
+      budget: round2(b.amount),
+      actual,
+      remaining: round2(b.amount - actual),
+      used_pct: b.amount ? actual / b.amount : (actual > 0 ? 1 : 0),
+      over: actual > b.amount + 0.01,
+    };
+  }).sort((a, b) => b.budget - a.budget);
+  const budgetTotal = round2(budgets.reduce((a, b) => a + (b.amount || 0), 0));
 
   return {
     project: {
@@ -129,10 +166,18 @@ export function computeProject(projectId) {
       unallocated: round2(unallocated),
       split_pct_total: round2(totalSplitPct),
       split_pct_valid: Math.abs(totalSplitPct - 1) < 0.0001,
+      total_received: round2(totalReceived),
+      total_incomes: incomes.length,
+      cash_position: round2(cashPosition),
+      outstanding: round2(outstanding),
+      collection_pct: collectionPct,
+      budget_total: budgetTotal,
     },
     stakeholders: stakeholderRows,
     by_category: byCategory,
     by_month: byMonth,
+    income_by_category: incomeByCategory,
+    budgets: budgetRows,
     totals: {
       contributed: round2(stakeholderRows.reduce((a, s) => a + s.contributed, 0)),
       profit_share: round2(stakeholderRows.reduce((a, s) => a + s.profit_share, 0)),

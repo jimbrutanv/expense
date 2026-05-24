@@ -82,6 +82,7 @@ router.get('/:projectId', requireProjectAccess('viewer'), (req, res) => {
   const categories = db.prepare('SELECT * FROM categories WHERE project_id = ? ORDER BY position, name').all(p.id);
   const paymentMethods = db.prepare('SELECT * FROM payment_methods WHERE project_id = ? ORDER BY position, name').all(p.id);
   const vendors = db.prepare('SELECT * FROM vendors WHERE project_id = ? ORDER BY position, name').all(p.id);
+  const budgets = db.prepare('SELECT * FROM budgets WHERE project_id = ? ORDER BY category').all(p.id);
   const stakeholders = db.prepare('SELECT * FROM stakeholders WHERE project_id = ? ORDER BY position, id').all(p.id);
   res.json({
     project: p,
@@ -89,6 +90,8 @@ router.get('/:projectId', requireProjectAccess('viewer'), (req, res) => {
     categories,
     payment_methods: paymentMethods,
     vendors,
+    budgets,
+    income_categories: ['Advance', 'Milestone Payment', 'Final Payment', 'Loan / Funding', 'Other'],
     stakeholders,
   });
 });
@@ -255,5 +258,22 @@ router.patch('/:projectId/vendors/:itemId', requireProjectAccess('manager', 'set
   res.json({ ok: true });
 });
 router.delete('/:projectId/vendors/:itemId', requireProjectAccess('manager', 'settings'), delRoute('vendors'));
+
+// ── Budgets (per category) ──────────────────────────────────────────────
+router.get('/:projectId/budgets', requireProjectAccess('viewer'), (req, res) => {
+  res.json({ items: db.prepare('SELECT * FROM budgets WHERE project_id = ? ORDER BY category').all(req.project.id) });
+});
+router.put('/:projectId/budgets', requireProjectAccess('manager', 'settings'), (req, res) => {
+  const { category, amount } = req.body || {};
+  if (!category || !category.trim()) return res.status(400).json({ error: 'Category is required' });
+  const amt = Number(amount) || 0;
+  db.prepare(
+    `INSERT INTO budgets (project_id, category, amount) VALUES (?, ?, ?)
+     ON CONFLICT(project_id, category) DO UPDATE SET amount = excluded.amount`
+  ).run(req.project.id, category.trim(), amt);
+  logAudit({ userId: req.user.id, userEmail: req.user.email, action: 'set_budget', entity: 'budget', projectId: req.project.id, details: { category, amount: amt }, ip: req.ip });
+  res.json({ ok: true });
+});
+router.delete('/:projectId/budgets/:itemId', requireProjectAccess('manager', 'settings'), delRoute('budgets'));
 
 export default router;

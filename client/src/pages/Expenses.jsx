@@ -83,7 +83,7 @@ export default function Expenses() {
           <Empty icon="receipt" title="No expenses found">{canEdit ? 'Add your first expense or adjust the filters.' : 'No expenses match the filters.'}</Empty>
         ) : (
           <div className="table-wrap">
-            <table className="tbl">
+            <table className="tbl cards">
               <thead><tr>
                 <th>Date</th><th>Ref</th><th>Description</th><th>Category</th>
                 <th className="num">Total</th><th>Paid by</th><th>Check</th><th>Payment</th>
@@ -92,17 +92,17 @@ export default function Expenses() {
               <tbody>
                 {data.expenses.map((e) => (
                   <tr key={e.id}>
-                    <td>{fmtDate(e.expense_date)}</td>
-                    <td><span className="muted">{e.ref}</span></td>
-                    <td>
+                    <td data-label="Date">{fmtDate(e.expense_date)}</td>
+                    <td data-label="Ref"><span className="muted">{e.ref}</span></td>
+                    <td data-label="Description">
                       {e.description || <span className="muted">—</span>}
                       {e.vendor && <div className="muted" style={{ fontSize: 11.5 }}>{e.vendor}</div>}
                       {e.receipt_no && <div className="muted flex" style={{ fontSize: 11.5, gap: 4 }}><Icon name="receipt" size={12} /> {e.receipt_no}</div>}
                     </td>
-                    <td>{e.category ? <Badge color="gray">{e.category}</Badge> : <span className="muted">—</span>}</td>
-                    <td className="num"><b>{money(e.total, cur)}</b></td>
-                    <td>
-                      <div className="flex wrap" style={{ gap: 4 }}>
+                    <td data-label="Category">{e.category ? <Badge color="gray">{e.category}</Badge> : <span className="muted">—</span>}</td>
+                    <td data-label="Total" className="num"><b>{money(e.total, cur)}</b></td>
+                    <td data-label="Paid by">
+                      <div className="flex wrap" style={{ gap: 4, justifyContent: 'flex-end' }}>
                         {e.splits.length === 0 ? <span className="muted">unallocated</span>
                           : e.splits.map((sp) => (
                             <span key={sp.stakeholder_id} className="badge gray" style={{ fontSize: 11 }}>
@@ -111,10 +111,10 @@ export default function Expenses() {
                           ))}
                       </div>
                     </td>
-                    <td>{e.split_check === 'ok' ? <Badge color="green">OK</Badge> : <Badge color="red">{e.split_check}</Badge>}</td>
-                    <td className="muted">{e.payment_method || '—'}</td>
+                    <td data-label="Check">{e.split_check === 'ok' ? <Badge color="green">OK</Badge> : <Badge color="red">{e.split_check}</Badge>}</td>
+                    <td data-label="Payment" className="muted">{e.payment_method || '—'}</td>
                     {canEdit && (
-                      <td>
+                      <td data-label="">
                         <div className="row-actions">
                           <button className="btn btn-icon btn-ghost" title="Edit" onClick={() => setEditing(e)}><Icon name="edit" size={16} /></button>
                           <button className="btn btn-icon btn-ghost" title="Delete" onClick={() => setDeleting(e)}><Icon name="trash" size={16} /></button>

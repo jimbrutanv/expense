@@ -77,7 +77,7 @@ export function projectAccess(user, projectId) {
     return {
       level: 'manager',
       rank: LEVEL_RANK.manager,
-      views: ['dashboard', 'expenses', 'stakeholders', 'settlement', 'members', 'settings'],
+      views: ['dashboard', 'expenses', 'income', 'stakeholders', 'settlement', 'reports', 'members', 'settings'],
       isAdmin: true,
     };
   }

@@ -83,8 +83,24 @@ Per project, each member gets an **access level** and a set of **enabled views**
 
 ### Projects
 - Multiple construction projects, each with its own stakeholders, expenses,
-  categories, payment methods, currency and sale price.
+  income, categories, payment methods, vendors, budgets, currency and sale price.
 - **Import any `.xlsx`** in the tracker format as a new project (Projects → Import).
+
+### Income & cash flow
+- An **Income/Payments** ledger records money received (advances, milestones,
+  final payment). The dashboard & reports then show **Total Received**, **Net Cash
+  Position** (received − spent), **Outstanding** to collect and **Collection %**.
+
+### Budgets & Reports
+- Set a **budget per category**; dashboard & reports show budget vs actual with
+  progress bars and over-budget flags.
+- A print-ready **Reports** tab: Profit & Loss, Cash Position, income-vs-expense
+  cash-flow chart, budget vs actual, spend by category, and a per-stakeholder
+  statement (Print/PDF + Excel).
+
+### Vendors
+- A per-project **Vendors/Suppliers** directory; tag expenses to a vendor and
+  filter by it.
 
 ### Expenses
 - Full CRUD with search, category / stakeholder / date / payment-method filters

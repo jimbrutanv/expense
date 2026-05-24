@@ -69,6 +69,7 @@ export default function Layout() {
       <div className="main">
         <header className="topbar">
           <button className="hamburger" onClick={() => setOpen((o) => !o)} aria-label="Menu"><Icon name="menu" size={22} /></button>
+          <span className="mobile-title"><Icon name="building" size={18} style={{ color: 'var(--brand)', verticalAlign: '-3px' }} /> BuildLedger</span>
           <div className="grow" />
           <button className="btn btn-icon btn-ghost" title={theme === 'dark' ? 'Light mode' : 'Dark mode'} onClick={() => setTheme((t) => t === 'dark' ? 'light' : 'dark')}>
             <Icon name={theme === 'dark' ? 'sun' : 'moon'} size={19} />

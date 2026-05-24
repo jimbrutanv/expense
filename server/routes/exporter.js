@@ -43,6 +43,14 @@ router.get('/expenses.csv', requireProjectAccess('viewer', 'expenses'), (req, re
   send(res, `${slug(req.project.name)}_expenses.csv`, toCsv(headers, rows));
 });
 
+// ── Income / payments received ────────────────────────────────────────
+router.get('/income.csv', requireProjectAccess('viewer', 'income'), (req, res) => {
+  const rows = db.prepare('SELECT * FROM incomes WHERE project_id = ? ORDER BY income_date, id').all(req.project.id);
+  const headers = ['Date', 'Ref', 'Source / Payer', 'Category', 'Amount', 'Method', 'Notes'];
+  const data = rows.map((i) => [i.income_date, i.ref, i.source, i.category, i.amount, i.method, i.notes]);
+  send(res, `${slug(req.project.name)}_income.csv`, toCsv(headers, data));
+});
+
 // ── Stakeholders ──────────────────────────────────────────────────────
 router.get('/stakeholders.csv', requireProjectAccess('viewer', 'stakeholders'), (req, res) => {
   const c = computeProject(req.project.id);

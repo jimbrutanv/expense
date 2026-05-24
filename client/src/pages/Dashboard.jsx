@@ -57,6 +57,35 @@ export default function Dashboard() {
         <Kpi label="Split Validation" value={s.split_pct_valid ? '100%' : pct(s.split_pct_total)} accent={s.split_pct_valid ? 'green' : 'red'} />
       </div>
 
+      {(s.total_received > 0 || s.total_incomes > 0) && (
+        <>
+          <h2 className="sec-head"><Icon name="trending" size={18} /> Cash Position</h2>
+          <div className="kpi-grid">
+            <Kpi label="Total Received" value={mc(s.total_received)} accent="green" sub={`${s.total_incomes} payments · ${pct(s.collection_pct)} of contract`} />
+            <Kpi label="Net Cash Position" value={mc(s.cash_position)} accent={s.cash_position >= 0 ? 'green' : 'red'} sub="received − spent" />
+            <Kpi label="Outstanding to Collect" value={mc(s.outstanding)} accent={s.outstanding > 0 ? 'red' : 'green'} />
+            <Kpi label="Total Spent" value={mc(s.total_spend)} />
+          </div>
+        </>
+      )}
+
+      {d.budgets.length > 0 && (
+        <div className="card">
+          <div className="card-head"><h3><Icon name="pie-chart" size={17} /> Budget vs Actual</h3>{d.budgets.some((b) => b.over) && <Badge color="red">over budget</Badge>}</div>
+          <div className="card-pad stack" style={{ gap: 12 }}>
+            {d.budgets.map((b) => (
+              <div key={b.category}>
+                <div className="flex between" style={{ fontSize: 13, marginBottom: 5 }}>
+                  <span>{b.category}</span>
+                  <span className={b.over ? 'neg' : 'muted'}>{m(b.actual)} / {m(b.budget)}</span>
+                </div>
+                <div className="bar-track"><div className="bar-fill" style={{ width: `${Math.min(b.used_pct * 100, 100)}%`, background: b.over ? 'var(--red)' : 'var(--brand)' }} /></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <div className="grid-2">
         <div className="card">
           <div className="card-head"><h3><Icon name="pie-chart" size={17} /> Spend by Category</h3></div>

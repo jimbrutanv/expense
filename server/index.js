@@ -12,6 +12,7 @@ import userRoutes from './routes/users.js';
 import projectRoutes from './routes/projects.js';
 import stakeholderRoutes from './routes/stakeholders.js';
 import expenseRoutes from './routes/expenses.js';
+import incomeRoutes from './routes/incomes.js';
 import dashboardRoutes from './routes/dashboard.js';
 import exportRoutes from './routes/exporter.js';
 import backupRoutes from './routes/backups.js';
@@ -37,6 +38,7 @@ app.use('/api/users', userRoutes);
 // Nested project resources (mergeParams reads :projectId)
 app.use('/api/projects/:projectId/stakeholders', stakeholderRoutes);
 app.use('/api/projects/:projectId/expenses', expenseRoutes);
+app.use('/api/projects/:projectId/income', incomeRoutes);
 app.use('/api/projects/:projectId/dashboard', dashboardRoutes);
 app.use('/api/projects/:projectId/export', exportRoutes);
 app.use('/api/projects', projectRoutes);

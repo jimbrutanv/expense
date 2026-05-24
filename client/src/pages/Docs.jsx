@@ -48,6 +48,32 @@ const SECTIONS = [
     ],
   },
   {
+    id: 'income', icon: 'trending', title: 'Income & Cash Flow',
+    body: [
+      ['p', 'The Income tab records money coming in — client advances, milestone payments and the final settlement. Each entry has a source/payer, category, amount and method.'],
+      ['p', 'Combining income with expenses gives a true cash picture, shown on the Dashboard and Reports:'],
+      ['list', [
+        ['Total Received', 'Sum of all payments in.'],
+        ['Net Cash Position', 'Received minus spent — actual cash in hand.'],
+        ['Outstanding', 'Contract price still left to collect.'],
+        ['Collection %', 'How much of the contract has been received.'],
+      ]],
+    ],
+  },
+  {
+    id: 'budgets', icon: 'pie-chart', title: 'Budgets',
+    body: [
+      ['p', 'Set a spend budget per category in Settings → Category Budgets. The Dashboard and Reports then show budget vs actual with progress bars and flag any category that goes over budget.'],
+    ],
+  },
+  {
+    id: 'reports', icon: 'file', title: 'Reports',
+    body: [
+      ['p', 'The Reports tab is a single, print-ready financial report: Profit & Loss, Cash Position, an income-vs-expense cash-flow chart, budget vs actual, spend by category, and a per-stakeholder statement.'],
+      ['p', 'Use Print / PDF to save or print it, or Excel to download the full workbook.'],
+    ],
+  },
+  {
     id: 'settlement', icon: 'scale', title: 'Settlement',
     body: [
       ['p', 'Each stakeholder should bear their split % of the total cost. The Settlement tab compares what each actually paid against their fair share:'],

@@ -7,8 +7,10 @@ import { Icon } from '../components/Icon.jsx';
 const TABS = [
   { to: 'dashboard', label: 'Dashboard', view: 'dashboard' },
   { to: 'expenses', label: 'Expenses', view: 'expenses' },
+  { to: 'income', label: 'Income', view: 'income' },
   { to: 'stakeholders', label: 'Stakeholders', view: 'stakeholders' },
   { to: 'settlement', label: 'Settlement', view: 'settlement' },
+  { to: 'reports', label: 'Reports', view: 'reports' },
   { to: 'members', label: 'Members', view: 'members', manager: true },
   { to: 'settings', label: 'Settings', view: 'settings', manager: true },
 ];

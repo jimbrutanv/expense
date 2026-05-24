@@ -67,6 +67,30 @@ CREATE TABLE IF NOT EXISTS expenses (
   UNIQUE (project_id, ref)
 );
 
+CREATE TABLE IF NOT EXISTS incomes (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id     INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  income_date    TEXT NOT NULL,
+  ref            TEXT NOT NULL,
+  source         TEXT DEFAULT '',
+  category       TEXT DEFAULT '',
+  amount         REAL NOT NULL DEFAULT 0,
+  method         TEXT DEFAULT '',
+  notes          TEXT DEFAULT '',
+  created_by     INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  created_at     TEXT NOT NULL DEFAULT (datetime('now')),
+  updated_at     TEXT NOT NULL DEFAULT (datetime('now')),
+  UNIQUE (project_id, ref)
+);
+
+CREATE TABLE IF NOT EXISTS budgets (
+  id         INTEGER PRIMARY KEY AUTOINCREMENT,
+  project_id INTEGER NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  category   TEXT NOT NULL,
+  amount     REAL NOT NULL DEFAULT 0,
+  UNIQUE (project_id, category)
+);
+
 CREATE TABLE IF NOT EXISTS expense_splits (
   id             INTEGER PRIMARY KEY AUTOINCREMENT,
   expense_id     INTEGER NOT NULL REFERENCES expenses(id) ON DELETE CASCADE,
@@ -140,6 +164,8 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 
 CREATE INDEX IF NOT EXISTS idx_expenses_project    ON expenses(project_id);
+CREATE INDEX IF NOT EXISTS idx_incomes_project     ON incomes(project_id);
+CREATE INDEX IF NOT EXISTS idx_budgets_project     ON budgets(project_id);
 CREATE INDEX IF NOT EXISTS idx_splits_expense      ON expense_splits(expense_id);
 CREATE INDEX IF NOT EXISTS idx_splits_stakeholder  ON expense_splits(stakeholder_id);
 CREATE INDEX IF NOT EXISTS idx_stakeholders_project ON stakeholders(project_id);

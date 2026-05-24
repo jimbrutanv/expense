@@ -77,6 +77,18 @@ export function buildProjectWorkbook(projectId) {
   exWs['!cols'] = [{ wch: 12 }, { wch: 11 }, { wch: 28 }, { wch: 16 }, { wch: 14 }, ...stakeCols.map(() => ({ wch: 13 })), { wch: 12 }, { wch: 12 }, { wch: 14 }, { wch: 22 }];
   xlsx.utils.book_append_sheet(wb, exWs, 'Expenses');
 
+  // ── Income sheet ──────────────────────────────────────────────────────
+  const incomes = db.prepare('SELECT * FROM incomes WHERE project_id = ? ORDER BY income_date, id').all(projectId);
+  const incRows = [
+    ['PAYMENTS / INCOME RECEIVED'],
+    ['Date', 'Ref', 'Source / Payer', 'Category', 'Amount Received', 'Method', 'Notes'],
+    ...incomes.map((i) => [i.income_date, i.ref, i.source || '', i.category || '', i.amount || 0, i.method || '', i.notes || '']),
+    ['TOTAL', '', '', '', incomes.reduce((a, i) => a + (i.amount || 0), 0)],
+  ];
+  const incWs = xlsx.utils.aoa_to_sheet(incRows);
+  incWs['!cols'] = [{ wch: 12 }, { wch: 11 }, { wch: 22 }, { wch: 18 }, { wch: 16 }, { wch: 14 }, { wch: 24 }];
+  xlsx.utils.book_append_sheet(wb, incWs, 'Income');
+
   // ── Dashboard sheet ───────────────────────────────────────────────────
   const s = c.snapshot;
   const dRows = [
